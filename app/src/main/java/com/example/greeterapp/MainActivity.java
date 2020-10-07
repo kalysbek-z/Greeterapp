@@ -12,12 +12,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
 public class MainActivity extends AppCompatActivity {
 
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
     EditText editName;
     Button greet;
     TextView textName;
@@ -27,12 +23,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        sharedPreferences = getSharedPreferences("name", Context.MODE_PRIVATE);
-        editor = sharedPreferences.edit();
         editName = (EditText) findViewById(R.id.greetField);
         greet = (Button) findViewById(R.id.greet);
         textName = (TextView) findViewById(R.id.name);
-        setTextOnCreate();
+        if(savedInstanceState != null){
+            name = savedInstanceState.getString("name");
+            textName.setText(name);
+        }
 
         greet.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,29 +37,21 @@ public class MainActivity extends AppCompatActivity {
                 if (((String) editName.getText().toString()).isEmpty()) {
                     Toast.makeText(MainActivity.this, "Text Field is empty!", Toast.LENGTH_SHORT).show();
                 } else {
-                    if (name != "") {
-                        name = sharedPreferences.getString("name", "");
-                        name = editName.getText().toString();
-                        textName.setText("Hello " + name);
-                    } else {
-                        name = editName.getText().toString();
-                        textName.setText("Hello " + name);
-                    }
-                    commitToSharedPreferences();
+                    name = "Hello " + editName.getText().toString();
+                    textName.setText(name);
                 }
             }
         });
     }
 
-    public void commitToSharedPreferences() {
-        editor.putString("name", name);
-        editor.commit();
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("name", name);
     }
 
-    private void setTextOnCreate() {
-        sharedPreferences = getSharedPreferences("name", Context.MODE_PRIVATE);
-        name = sharedPreferences.getString("name", "");
-        textName.setText(name);
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
     }
-
 }
